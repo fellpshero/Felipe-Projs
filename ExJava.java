@@ -24,7 +24,7 @@ class DownloadThread extends Thread {
 }
 
 // Classe Principal para rodar o teste
-public class Main {
+public class ExJava {
     public static void main(String[] args) {
         // 1. Cria e inicia a thread do download
         DownloadThread download = new DownloadThread();
