@@ -1,0 +1,45 @@
+algoritmo "ex9matriz"
+
+var
+produto : vetor [0..5] de caractere
+estoque : vetor [0..5, 0..1] de inteiro
+status : vetor [0..5] de caractere
+i : inteiro
+prodalerta : inteiro
+dif : inteiro
+
+inicio
+para i de 0 ate 5 faca
+escreval("Insira o nome do ", (i+1), "º produto:")
+leia(produto[i])
+fimpara
+
+para i de 0 ate 5 faca
+escreval("Insira a quantidade atual de ", produto[i], ":")
+leia(estoque[i, 0])
+escreval("Agora, insira a quantidade mínima requerida no estoque: ")
+leia(estoque[i, 1])
+fimpara
+
+para i de 0 ate 5 faca
+dif <- (estoque[i, 0] - estoque[i, 1])
+se (dif < 0) entao
+status[i] <- "ALERTA!"
+senao
+status[i] <- "Ok!"
+fimse
+fimpara
+
+para i de 0 ate 5 faca
+se (status[i] = "ALERTA!") entao
+prodalerta <- prodalerta + 1
+fimse
+fimpara
+
+escreval(prodalerta, " produtos estao abaixo do estoque minimo")
+
+para i de 0 ate 5 faca
+escreval(produto[i], ":"," - ", status[i])
+fimpara
+
+fimalgoritmo
