@@ -12,7 +12,7 @@ print(type(d))
 
 x = 2
 
-if x ==3:
+if x == 3:
     print("X é igual a 3")
 else:
     print("X não é igual a 3")
