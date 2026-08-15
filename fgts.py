@@ -38,7 +38,8 @@ def registrar(mensagem):
 # ---------------------------------------------------------------------------
 
 CNPJS_EMPRESAS = {
-        "05.616.026/0001-82": "GIZ AUTO POSTO",
+    "06.293.329/0001-74": "POSTO DE SERVICO ARMANDO DE MORAES LTDA",
+    "05.616.026/0001-82": "GIZ AUTO POSTO",
     "04.445.372/0001-82": "SMALL GAS",
     "02.770.000/0001-04": "KOBAIN AUTO POSTO",
     "05.553.336/0001-03": "ILHABELA",
