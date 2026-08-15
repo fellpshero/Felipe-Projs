@@ -2,6 +2,25 @@ from playwright.sync_api import sync_playwright
 from datetime import datetime
 
 # ---------------------------------------------------------------------------
+# AUTOMAÇÃO FGTS - Emissão de Guias e Relatórios
+# ---------------------------------------------------------------------------
+# 
+# CONFIGURAÇÕES DISPONÍVEIS (edite conforme necessário):
+#
+# 1. COMPETENCIA: Mês/Ano a processar (ex: "07/2026")
+# 2. VENCIMENTO_DESEJADO: Específica qual data de vencimento baixar
+#    - None (padrão) = baixa TODAS as datas disponíveis
+#    - "18/08/2026" = baixa APENAS guias com esse vencimento
+# 3. BAIXAR_TODOS_VENCIMENTOS: True = ignora VENCIMENTO_DESEJADO e baixa tudo
+#
+# EXEMPLOS DE USO:
+# - Baixar TODAS as guias da competência: deixe BAIXAR_TODOS_VENCIMENTOS = True
+# - Baixar APENAS vencimento 20/08/2026: defina VENCIMENTO_DESEJADO = "20/08/2026"
+# - Processar competência diferente: altere COMPETENCIA = "08/2026"
+#
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
 # LOG - registra tudo em arquivo alem de mostrar no cmd, pra revisar depois
 # ---------------------------------------------------------------------------
 
@@ -66,10 +85,90 @@ COMPETENCIA = "07/2026"
 PASTA_DOWNLOAD = r"C:\Users\RH Intersoft\Desktop\GuiasFGTS"
 LOG_PATH = r"C:\Users\RH Intersoft\Desktop\GuiasFGTS\log_execucao.txt"
 
+# OPÇÕES DE FILTRAGEM
+VENCIMENTO_DESEJADO = None  # None = baixa TODAS as guias, ou especifique "18/08/2026" para uma específica
+BAIXAR_TODOS_VENCIMENTOS = True  # True = baixa todos os vencimentos disponíveis
+
 
 # ---------------------------------------------------------------------------
 # FUNÇÕES DE AUTOMAÇÃO
 # ---------------------------------------------------------------------------
+
+def desmarcar_rescisorio(page, nome_empresa):
+    """Desmarca a checkbox de Rescisório após selecionar competência.
+    Retorna True se conseguiu desmarcar, False caso contrário."""
+    try:
+        checkbox_rescisorio = page.locator("#h-checkbox-2")
+        if checkbox_rescisorio.count() > 0:
+            if checkbox_rescisorio.is_checked(timeout=1000):
+                checkbox_rescisorio.click(force=True)
+                page.wait_for_timeout(500)
+                registrar(f"  ✓ Rescisório desmarcado")
+                return True
+        else:
+            registrar(f"  ⚠️ Checkbox rescisório não encontrado")
+            return False
+    except Exception as e:
+        registrar(f"  ⚠️ Erro ao desmarcar rescisório: {str(e)}")
+        return False
+
+
+def listar_vencimentos_disponiveis(page):
+    """Lista todas as datas de vencimento ÚNICAS disponíveis na página após pesquisar.
+    Retorna uma lista com as datas encontradas (ex: ["18/08/2026", "20/08/2026"])."""
+    vencimentos_unicos = set()  # Usa set para garantir unicidade
+    try:
+        # Procura por todos os elementos com padrão "Mensal - Vencimento da Guia: DD/MM/YYYY"
+        titulos = page.locator("text=/Mensal.*Vencimento da Guia:/").all()
+        
+        for titulo in titulos:
+            try:
+                texto = titulo.text_content()
+                if "Vencimento da Guia:" in texto:
+                    data = texto.split("Vencimento da Guia:")[1].strip()
+                    vencimentos_unicos.add(data)  # Adiciona ao set (automáticamente evita duplicatas)
+            except Exception:
+                continue
+        
+        # Converte de volta para lista e ordena
+        vencimentos = sorted(list(vencimentos_unicos))
+        for data in vencimentos:
+            registrar(f"  → Vencimento encontrado: {data}")
+                
+    except Exception as e:
+        registrar(f"  ⚠️ Erro ao listar vencimentos: {str(e)}")
+        vencimentos = []
+    
+    return vencimentos
+
+
+def filtrar_vencimento(vencimentos_disponiveis, vencimento_selecionado):
+    """Filtra os vencimentos baseado na seleção do usuário.
+    Se BAIXAR_TODOS_VENCIMENTOS=True, retorna todos.
+    Se vencimento_selecionado especificado, retorna apenas esse."""
+    if BAIXAR_TODOS_VENCIMENTOS:
+        return vencimentos_disponiveis
+    elif vencimento_selecionado and vencimento_selecionado in vencimentos_disponiveis:
+        return [vencimento_selecionado]
+    elif vencimento_selecionado:
+        registrar(f"  ⚠️ Vencimento {vencimento_selecionado} não encontrado. Baixando todos...")
+        return vencimentos_disponiveis
+    else:
+        return vencimentos_disponiveis
+
+
+def obter_card_guia_por_vencimento(page, vencimento):
+    """Localiza o card específico de uma guia pelo seu vencimento.
+    Retorna o card (locator) se encontrado, None caso contrário."""
+    try:
+        # Procura pelo padrão exato "Vencimento da Guia: DD/MM/YYYY" dentro de um container
+        card = page.locator(f"div:has-text('Vencimento da Guia: {vencimento}')").first
+        if card.count() > 0:
+            return card
+    except Exception:
+        pass
+    return None
+
 
 def abrir_selecionar_procurador(page):
     """Volta para a home (onde 'Trocar Perfil' fica disponivel), abre o modal
@@ -124,11 +223,14 @@ def emitir_guia_e_relatorio(page, nome_empresa):
     # CHECAGEM 1: A competência existe no menu suspenso?
     if not opcao_competencia.is_visible(timeout=3000):
         registrar(f"⚠️ AVISO: A competência {COMPETENCIA} não existe para {nome_empresa}. Pulando...")
-        page.keyboard.press("Escape")  # Fecha a listinha aberta
-        return  # Sai da função e vai para a próxima empresa do loop
+        page.keyboard.press("Escape")
+        return
 
     opcao_competencia.click(force=True)
     page.wait_for_timeout(1000)
+
+    # DESMARCAR RESCISÓRIO
+    desmarcar_rescisorio(page, nome_empresa)
 
     page.get_by_role("button", name="Pesquisar").click()
     page.wait_for_timeout(2000)
@@ -139,41 +241,92 @@ def emitir_guia_e_relatorio(page, nome_empresa):
         registrar(f"ℹ️ SEM DÉBITOS DE INTERESSE: {nome_empresa} não possui guia na competência {COMPETENCIA}. Pulando...")
         return
 
-    # CHECAGEM 3: O botão "Emitir guia" apareceu na tela?
-    btn_emitir = page.get_by_role("button", name="Emitir guia")
-    if not btn_emitir.is_visible(timeout=5000):
-        registrar(f"⚠️ AVISO: Nenhuma guia encontrada na competência {COMPETENCIA} para {nome_empresa}. Pulando...")
-        return  # Sai da função e vai para a próxima empresa do loop
+    # LISTAR VENCIMENTOS DISPONÍVEIS
+    registrar(f"  📋 Buscando vencimentos disponíveis...")
+    vencimentos_disponiveis = listar_vencimentos_disponiveis(page)
+    if not vencimentos_disponiveis:
+        registrar(f"ℹ️ Nenhuma guia encontrada após pesquisa para {nome_empresa}. Pulando...")
+        return
 
-    competencia_arquivo = COMPETENCIA.replace("/", "-")
+    vencimentos_para_processar = filtrar_vencimento(vencimentos_disponiveis, VENCIMENTO_DESEJADO)
+    registrar(f"  → Processando {len(vencimentos_para_processar)} vencimento(s): {', '.join(vencimentos_para_processar)}")
 
-    #competencia_arquivo = COMPETENCIA.replace("/", "-")
+    total_guias_processadas = 0
 
-    # Emissão e Download da Guia PDF
-    with page.expect_download() as download_info:
-        btn_emitir.click()
-    download_info.value.save_as(f"{PASTA_DOWNLOAD}\\{nome_empresa} - Guia - {competencia_arquivo}.pdf")
+    # Processar cada vencimento específico encontrado
+    for idx, vencimento_data in enumerate(vencimentos_para_processar):
+        try:
+            # Localizar o card específico DESTE vencimento
+            card = obter_card_guia_por_vencimento(page, vencimento_data)
+            if card is None:
+                registrar(f"  ⚠️ Card não encontrado para vencimento {vencimento_data}. Pulando...")
+                continue
 
-    # A pausa continua aqui
-    page.wait_for_timeout(4000)
+            data_vencimento = vencimento_data.replace("/", "-")
+            registrar(f"  → Processando guia #{idx + 1} com vencimento: {vencimento_data}")
 
-    # Nova tentativa de baixar o relatório
-    try:
-        # Busca o ícone e adiciona um timeout específico para ele aparecer
-        btn_relatorio = page.locator("i.fa-file-pdf").first
-        
-        with page.expect_download(timeout=10000) as download_info2:
-            # O timeout=5000 aqui dentro diz: "tente clicar por até 5s"
-            btn_relatorio.click(force=True, timeout=5000)
-            
-        download_info2.value.save_as(f"{PASTA_DOWNLOAD}\\{nome_empresa} - Relatorio - {competencia_arquivo}.pdf")
-        
-    except Exception as erro:
-        # Agora o robô vai registrar o motivo exato de não ter clicado
-        registrar(f"❌ ERRO REAL AO BAIXAR RELATÓRIO ({nome_empresa}): {str(erro)}")
+            # Emissão da guia com tratamento do modal de confirmação, se houver
+            btn_emitir_local = card.get_by_role("button", name="Emitir guia").first
+            if btn_emitir_local.count() == 0:
+                registrar(f"  ⚠️ Botão 'Emitir guia' não encontrado no card de {vencimento_data}. Pulando...")
+                continue
 
-    page.wait_for_timeout(2000)
-    return True
+            with page.expect_download(timeout=20000) as download_info:
+                btn_emitir_local.click()
+                page.wait_for_timeout(1000)
+                btn_confirmar = page.get_by_role("button", name="Confirmar")
+                if btn_confirmar.count() > 0:
+                    registrar(f"    → Modal de confirmação detectado, clicando em Confirmar...")
+                    btn_confirmar.click()
+                    page.wait_for_timeout(1000)
+
+            nome_arquivo_guia = f"{nome_empresa} - Guia - {data_vencimento}.pdf"
+            download_info.value.save_as(f"{PASTA_DOWNLOAD}\\{nome_arquivo_guia}")
+            registrar(f"    ✓ Guia baixada: {nome_arquivo_guia}")
+
+            page.wait_for_timeout(2000)
+
+            # Baixar relatório: procurar no card OU na página em geral
+            try:
+                btn_relatorio_local = None
+                
+                # Primeiro tenta no card específico
+                try:
+                    btn_relatorio_local = card.locator("i.fa-file-pdf").first
+                    if btn_relatorio_local.count() == 0:
+                        btn_relatorio_local = None
+                except Exception:
+                    btn_relatorio_local = None
+                
+                # Se não achou no card, procura na página inteira (pode ter mudado após emissão)
+                if btn_relatorio_local is None:
+                    registrar(f"    ℹ️ Procurando relatório na página...")
+                    btn_relatorio_local = page.locator("i.fa-file-pdf").first
+                    if btn_relatorio_local.count() == 0:
+                        raise Exception("Botão PDF não encontrado nem no card nem na página")
+                
+                with page.expect_download(timeout=15000) as download_info2:
+                    btn_relatorio_local.click(force=True, timeout=5000)
+
+                nome_arquivo_relatorio = f"{nome_empresa} - Relatorio - {data_vencimento}.pdf"
+                download_info2.value.save_as(f"{PASTA_DOWNLOAD}\\{nome_arquivo_relatorio}")
+                registrar(f"    ✓ Relatório baixado: {nome_arquivo_relatorio}")
+            except Exception as erro:
+                registrar(f"    ⚠️ AVISO ao baixar relatório para {vencimento_data}: {str(erro)}")
+
+            page.wait_for_timeout(1500)
+            total_guias_processadas += 1
+
+        except Exception as erro:
+            registrar(f"  ❌ ERRO ao processar guia com vencimento {vencimento_data}: {str(erro)}")
+            continue
+
+    if total_guias_processadas > 0:
+        registrar(f"OK - {nome_empresa}: {total_guias_processadas} guia(s) e relatório(s) concluído(s).")
+        return True
+    else:
+        registrar(f"⚠️ AVISO: Nenhuma guia foi processada para {nome_empresa}.")
+        return False
 
 # ---------------------------------------------------------------------------
 # EXECUÇÃO PRINCIPAL
