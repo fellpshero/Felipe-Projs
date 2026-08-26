@@ -1,0 +1,56 @@
+# robots.txt — gastrobajas.netlify.app
+# Libera indexação geral e acesso explícito a crawlers de IA,
+# para que assistentes e navegadores com IA consigam ler e recomendar o site.
+
+User-agent: *
+Allow: /
+
+# Crawlers de treinamento/indexação de IA usados por assistentes e buscadores
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Arquivo de contexto para LLMs (padrão llms.txt)
+# https://llmstxt.org/
+Sitemap: https://gastrobajas.netlify.app/llms.txt
