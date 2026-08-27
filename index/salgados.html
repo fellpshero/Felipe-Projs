@@ -1,10 +1,16 @@
-<html>
+<html> 
         <head>
-            <title> Meu Index </title>
+            <title> Meu Index </title> 
+
+            <style>
+                .legenda:hover {
+                    color: orange;
+                }
+            </style>
         </head>
         <body background = "fundo.jpg" >
 
-            <table
+            <table 
             width="100%"
             border="8px"
             bordercolor="#772222">
@@ -18,36 +24,40 @@
                 </tr>
             </table>
 
-            <br>
+            <p>
+                Clique aqui para ir ao site com as <a style="color: darkred; text-decoration: none;"
+                href="doces.html" Receitas Salgadas>
+                <b>Receitas Doces</b></a>
+            </p>
 
             <table align="center">
                 <tr>
                     <td align="center">
-                        <a style="color: green; text-decoration: none;"
-                            href="institucional.html">
+                        <a style="color: brown; text-decoration: none;"
+                            href="#pastel">
                             <img src="pastel.jpg" alt="Receita de pastel" size="280x280">
                             <br />
-                            <font face="Verdana" color="brown"><b> Pastel </b></font>
+                            <span class="legenda"><b>Pastel</b></span>
                         </a>
                         <br>
                     </td>
 
                     <td align="center">
-                        <a style="color: green; text-decoration: none;"
-                            href="institucional.html">
+                        <a style="color: brown; text-decoration: none;"
+                            href="#pao">
                             <img src="pao.jpg" alt="Receita de pão" size="280x280">
                             <br />
-                            <font face="Verdana" color="brown"><b> Pão </b></font>
+                            <span class="legenda"><b>Pão</b></span>
                         </a>
                         <br>
                     </td>
 
                     <td align="center">
-                        <a style="color: green; text-decoration: none;"
-                            href="institucional.html">
+                        <a style="color: brown; text-decoration: none;"
+                            href="#crepe">
                             <img src="crepe.jpg" alt="Receita de crepe" size="280x280">
                             <br />
-                            <font face="Verdana" color="brown"><b> Crepe </b></font>
+                            <span class="legenda"><b>Crepe</b></span>
                         </a>
                         <br>
                         
@@ -56,7 +66,7 @@
             </table>
             <br />
             <br />
-            <h2 style="color:red">
+            <h2 id="pastel" style="color:red">
                 <b>Pastel</b>
             </h2>
             <p style="font-size:larger; color:blue;">
@@ -103,7 +113,7 @@
             </font>
             </pre>
 
-            <h2 style="color:red">
+            <h2 id="pao" style="color:red">
                 <b>Pão</b>
             </h2>
             <pr></pr>
@@ -146,7 +156,7 @@
             </font>
             </pre>
 
-            <h2 style="color:red">
+            <h2 id="crepe" style="color:red">
                 <b>Crepe</b>
             </h2>
             <pr></pr>
@@ -180,7 +190,7 @@
             <br />
             <br />
             <p align="center">
-                <a href = "pastel.html">
+                <a href = "sodois.html">
                     <img src= "voltar.png" >
                 </a>
             </p>
