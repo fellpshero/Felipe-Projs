@@ -1,18 +1,19 @@
-"""Danki"""
+#area do retangulo
+print("Área do retângulo")
+a = float(input("Insira a altura: "))
+l = float(input("Insira a largura: "))
+areaRet = a * l
+print("A área do retângulo é de: ", areaRet)
 
-a = "Olá Mundo"
-b = 5
-c = 3
-d = 1+2j
+#area de um quadrado
+print("Área do quadrado")
+l = float(input("Insira a valor do lado: "))
+areaQuad = l * l
+print("A área do quadrado é de: ", areaQuad)
 
-print(a)
-print(type(b))
-print(type(c))
-print(type(d))
-
-x = 2
-
-if x == 3:
-    print("X é igual a 3")
-else:
-    print("X não é igual a 3")
+#desconto
+print("Cálculo de desconto")
+p = float(input("Qual valor do seu produto: "))
+d = float(input('Quantos % de desconto será aplicado (sem o %): '))
+prodComDsct = (float(p)-(float(p) * float(d)/100))
+print("O valor do produto com desconto é de R$", prodComDsct)
