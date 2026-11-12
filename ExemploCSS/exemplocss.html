@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <title> Exemplo CSS</title>
+
+        <style type="text/css">
+            p {
+                color:chartreuse;
+                font-size: 14pt;
+                font-weight: bold;    
+            }
+
+            .paragrafo{
+                font-size: 12pt;
+                font-style: italic;
+                color: blueviolet;
+            }
+
+            #Texto{
+                font-size: 12pt;
+                font-style: italic;
+                background-color: blueviolet;
+            }
+
+            input[type="text"]{
+                border-radius: 5px;
+                border: 1px solid #FF0000;
+                height: 30px;
+                width: 100px;
+                
+            }
+        </style>
+    </head>
+    <body>
+        <!-- css inline -->
+        <p style="font-size: 48px; color: brown;"> Fatec Mococa </p>
+        <p style="font-size: 48pt; color: blue;"> Fatec Mococa </p>
+
+        <!-- seletor de TAG -->
+        <p> Fatec Mococa </p>
+
+        <!-- seletor de classe -->
+        <p class="paragrafo"> Fatec Mococa </p>
+
+        <!-- seletor de ID -->
+        <p id="Texto"> Fatec Mococa </p>
+
+        <!-- seletor de ATRIBUTOS -->
+        Digite seu nome: <input id="nome" value="Maicon" type="text" /> 
+
+
+    </body>
+</html>

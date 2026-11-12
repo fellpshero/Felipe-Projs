@@ -1,5 +1,10 @@
+import java.util.Scanner; // classe para ler dados do teclado no console
 public class Main {
     public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);  // lê dados do teclado
+        // System.out.println("digite");
+        // int teste = scan.nextInt();
+
         String especie[] = {"cao", "outro", "gato", "cao", "gato", "outro", "outro",
                 "gato", "cao", "gato", "cao", "gato"};
         char doenca[] = {'n', 's', 'n', 'n', 'n', 'n', 's', 'n', 'n', 'n', 'n', 'n'};
@@ -39,6 +44,26 @@ public class Main {
             somaPeso = somaPeso + peso[i];
         }
         double mediaIdade = (double) somaIdade / especie.length;
+        /* operador de divisão inteira
+        C, C++, Java, Go, Rust, Ruby, Kotlin: /
+        Python, Lua: //
+        VBA: \
+        JavaScript Math.floor(i/j)
+        PHP: intdiv(i,j)
+        1) Distribuir itens em grupos: tem 47 alunos e quero formar turmas de 10:
+        quantidade de turmas cheiasm: 47 / 10 = 4
+        resto (47 % 10 = 7) diz quantos alunos sobram.
+
+        2) Conversão entre unidades
+        int totalSegundos = 3725;
+        int horas = totalSegundos / 3600;
+        int minutos = (totalSegundos % 3600) / 60;
+        int segundos = totalSegundos % 60;
+
+        3) Algoritmos
+        Busca binária usa (inicio + fim) / 2 para achar o meio de um array.
+        Conversão de base numérica (decimal → binário, por exemplo) é feita dividindo repetidamente por 2 e guardando os restos.
+        */
         double mediaPeso = somaPeso / especie.length;
         System.out.printf("Média idade: %.2f\n", mediaIdade);
         System.out.printf("Média peso: %.2f\n", mediaPeso);
@@ -55,14 +80,33 @@ public class Main {
         double mediaPesoGato60 = somaPesoGato60 / contGato60;
         System.out.printf("Média: %.1f\n", mediaPesoGato60);
 
-        System.out.println("  not equals  ");
+        System.out.print("  % not equals cão e gato  ");
+        int contOutros =0;
         for (int i = 0; i < especie.length; i++) {
             if ( ! especie[i].equalsIgnoreCase("cao") &&
                   !  especie[i].equalsIgnoreCase("gato") ) {
-                contOutros++;
+                contOutros++; // contOutros = contOutros + 1;
             }
         }
         double percOutros = (double) contOutros / especie.length * 100;
         System.out.println(percOutros);
+
+        // 8) Solicite que o usuário digite uma espécie e exiba os dados dos animais da espécie digitada.
+        String especDig;
+        System.out.println("\nDigite a espécie");
+        especDig = scan.next(); // leia(especDig) só para String
+
+        int achou = 0;
+        for(int i=0; i<especie.length; i++){
+            // if(especDig.equalsIgnoreCase(especie[i]))
+            if(especie[i].equalsIgnoreCase(especDig)){
+                System.out.printf("%10s %10c %10d %10.2f\n", especie[i],
+                        doenca[i], idade[i], peso[i]);
+                achou = 1;
+            }
+        }
+        if(achou == 0) {
+            System.out.println("Nenhum " + especDig + " encontrado.");
+        }
     }
 }

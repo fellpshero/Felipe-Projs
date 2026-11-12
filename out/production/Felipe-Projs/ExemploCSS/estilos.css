@@ -1,0 +1,25 @@
+p {
+    color:chartreuse;
+    font-size: 14pt;
+    font-weight: bold;    
+}
+
+.paragrafo{
+    font-size: 12pt;
+    font-style: italic;
+    color: blueviolet;
+}
+
+#Texto{
+    font-size: 12pt;
+    font-style: italic;
+    background-color: blueviolet;
+}
+
+input[type="text"]{
+    border-radius: 5px;
+    border: 1px solid #FF0000;
+    height: 30px;
+    width: 100px;
+    
+}
